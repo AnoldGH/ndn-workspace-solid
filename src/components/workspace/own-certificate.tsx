@@ -4,12 +4,13 @@ import { Show, createEffect, createSignal } from 'solid-js'
 import { bytesToBase64 } from '../../utils'
 import { Encoder } from '@ndn/tlv'
 import { Certificate } from '@ndn/keychain'
-import CertQrCode from './qr-gen'
+import { toDataURL } from 'qrcode'
 
 export default function OwnCertificate(props: { certificate: Certificate | undefined }) {
   const [expanded, setExpanded] = createSignal(true)
   const [nameStr, setNameStr] = createSignal('')
   const [certText, setCertText] = createSignal('')
+  const [qrCodeUrl, setQrCodeUrl] = createSignal('')
 
   createEffect(() => {
     const cert = props.certificate
@@ -33,6 +34,17 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
     }
   })
 
+  // Generate QR-Code when certText change
+  createEffect(() => {
+    toDataURL(certText(), { errorCorrectionLevel: 'M' }) // TODO: hardcoded error-level
+      .then((url) => {
+        setQrCodeUrl(url)
+      })
+      .catch((e) => {
+        console.error('Error generating QR code', e)
+      })
+  })
+
   return (
     <Card>
       <CardHeader
@@ -54,14 +66,14 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
       <Show when={expanded()}>
         <Divider />
         <CardContent>
-          <div style={{ display: 'flex', 'flex-direction': 'row', 'align-items': 'center' }}>
+          <div style={{ display: 'flex', 'align-items': 'flex-start' }}>
             <TextField
               fullWidth
               multiline
               label="My Certificate"
               name="certificate"
               type="text"
-              rows={14}
+              rows={10}
               inputProps={{
                 // readOnly: true,  // readOnly does not work with multiline
                 style: {
@@ -72,7 +84,7 @@ export default function OwnCertificate(props: { certificate: Certificate | undef
               value={certText()}
             />
             <div>
-              <CertQrCode value={certText()} />
+              <img src={qrCodeUrl()} alt="QR Code" style={{ 'margin-left': '20px' }} />
             </div>
           </div>
         </CardContent>
