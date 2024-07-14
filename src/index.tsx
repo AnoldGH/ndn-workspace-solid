@@ -9,6 +9,7 @@ import {
   Home as HomeIcon,
   Chat as ChatIcon,
   Settings as SettingsIcon,
+  Description as LogIcon,
 } from '@suid/icons-material'
 
 import Root from './components/root-wrapper'
@@ -22,6 +23,7 @@ import { project } from './backend/models'
 import { Toaster } from 'solid-toast'
 import { Chat } from './components/chat/chat'
 import ConfigPage from './components/config'
+import Log from './components/log'
 
 const root = document.getElementById('root')
 
@@ -56,6 +58,7 @@ const rootComponent = (props: RouteSectionProps) => (
         title: 'Connection',
       },
       { icon: <SettingsIcon />, href: '/config-page', title: 'Settings' },
+      { icon: <LogIcon />, href: '/log', title: 'Log' },
     ]}
   >
     {props.children}
@@ -76,6 +79,7 @@ render(
         <Route path="/convert-testbed" component={ConvertTestbed} />
         <Route path="/oauth-test" component={OauthTest} />
         <Route path="/config-page" component={ConfigPage} />
+        <Route path="/log" component={Log} />
       </Router>
 
       <Toaster />
