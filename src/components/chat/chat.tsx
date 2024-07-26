@@ -5,6 +5,8 @@ import { chats } from '../../backend/models'
 import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
+import { Chip, IconButton } from '@suid/material'
+import { Add as AddIcon, Tab } from '@suid/icons-material'
 
 // TODO: Do not load all messages at once
 // TODO: Support Markdown
@@ -19,8 +21,11 @@ export function Chat() {
 
   const [messageTerm, setMessageTerm] = createSignal('')
   const [container, setContainer] = createSignal<HTMLDivElement>()
-  const [currentChannel, setCurrentChannel] = createSignal('general')
-  const channels = ['general', 'paper_writing', 'code_discussion', 'help'] // Define your channels here
+  const [currentChannel, setCurrentChannel] = createSignal('') // starts on no channel
+
+  // const channels = ['general', 'paper_writing', 'code_discussion', 'help'] // Define your channels here
+  const channelsSync = createSyncedStoreSig(() => rootDoc()?.chats_channels)
+  const channels = () => channelsSync()?.value
 
   if (!booted()) {
     navigate('/profile', { replace: true })
@@ -36,6 +41,34 @@ export function Chat() {
       } satisfies chats.Message),
     )
     setMessageTerm('')
+  }
+
+  /* Create new channels */
+  const generateChannelName = () => {
+    let name = 'new_channel'
+    if (channels() === undefined) return name
+    else {
+      let idx = 1
+      while (channels()?.includes(name)) {
+        idx++
+        name = 'new_channel'.concat('_', idx.toString())
+      }
+      return name
+    }
+  }
+
+  const addChannel = () => {
+    const name = generateChannelName()
+    channels()?.push(name)
+    setCurrentChannel(name)
+  }
+
+  const removeChannel = (channel: string) => {
+    const idx = channels()?.indexOf(channel)
+    if (idx == -1 || idx == undefined) return
+    else {
+      channels()?.splice(idx, 1)
+    }
   }
 
   createEffect(
@@ -54,16 +87,20 @@ export function Chat() {
     <div class={styles.App}>
       <div class={styles.App_header}>
         <div>
-          <For each={channels}>
+          <For each={channels()}>
             {(channel) => (
-              <button
-                class={currentChannel() === channel ? styles.ActiveChannelButton : styles.ChannelButton}
+              <Chip
+                label={channel}
+                color={channel === currentChannel() ? 'primary' : 'default'}
+                onDelete={() => removeChannel(channel)}
+                clickable={true}
                 onClick={() => setCurrentChannel(channel)}
-              >
-                {channel}
-              </button>
+              ></Chip>
             )}
           </For>
+          <IconButton onClick={addChannel}>
+            <AddIcon />
+          </IconButton>
         </div>
         <h2 style={{ color: '#333' }}>#{currentChannel()} Channel</h2>
       </div>
