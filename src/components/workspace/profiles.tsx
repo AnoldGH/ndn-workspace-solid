@@ -12,7 +12,12 @@ import {
   IconButton,
   Button,
 } from '@suid/material'
-import { PersonAdd as PersonAddIcon, PlayArrow as PlayArrowIcon, Delete as DeleteIcon } from '@suid/icons-material'
+import {
+  PersonAdd as PersonAddIcon,
+  PlayArrow as PlayArrowIcon,
+  Delete as DeleteIcon,
+  ChangeCircle as ConvertIcon,
+} from '@suid/icons-material'
 import { Profile, toBootParams as profileToBootParams, profiles as db } from '../../backend/models/profiles'
 import { For, createEffect, createSignal } from 'solid-js'
 import { useNdnWorkspace } from '../../Context'
@@ -59,9 +64,9 @@ export default function Profiles() {
           <Typography sx={{ flex: '1 1 100%' }} variant="h6" component="div">
             Profiles
           </Typography>
-          <Button onClick={() => navigate('/convert-testbed', { replace: true })} variant="outlined" color="secondary">
-            Convert
-          </Button>
+          <IconButton onClick={() => navigate('/convert-testbed', { replace: true })}>
+            <ConvertIcon color="secondary" />
+          </IconButton>
           <IconButton onClick={() => navigate('/workspace', { replace: true })}>
             <PersonAddIcon color="primary" />
           </IconButton>
