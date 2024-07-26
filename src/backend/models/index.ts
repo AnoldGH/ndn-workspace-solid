@@ -10,6 +10,7 @@ export { project, connections, profiles, chats }
 export type RootDocType = {
   latex: project.Items
   chats: Box<chats.Message>[]
+  chats_channels: string[]
 }
 export type RootDocStore = ReturnType<typeof syncedStore<RootDocType>>
 
@@ -18,6 +19,7 @@ export function initRootDoc(guid: string) {
     {
       latex: {},
       chats: [],
+      chats_channels: [],
     } as RootDocType,
     new Y.Doc({ guid }),
   )
