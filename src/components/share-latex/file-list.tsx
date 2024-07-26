@@ -54,7 +54,7 @@ export default function FileList(props: {
   }
 
   return (
-    <TableContainer component={Paper} sx={{ maxHeight: '650px', overflowY: 'auto' }}>
+    <TableContainer component={Paper} sx={{ maxHeight: screen.availHeight - 200, overflowY: 'auto' }}>
       <Table sx={{ minWidth: 650 }}>
         <TableHead>
           <TableRow>
