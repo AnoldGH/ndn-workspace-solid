@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, on } from 'solid-js'
+import { createEffect, createSignal, For, Match, on, Show, Switch } from 'solid-js'
 import { boxed } from '@syncedstore/core'
 import { useNdnWorkspace } from '../../Context'
 import { chats } from '../../backend/models'
@@ -102,7 +102,14 @@ export function Chat() {
             <AddIcon />
           </IconButton>
         </div>
-        <h2 style={{ color: '#333' }}>#{currentChannel()} Channel</h2>
+        <Switch>
+          <Match when={currentChannel() !== ''}>
+            <h2 style={{ color: '#333' }}>#{currentChannel()} Channel</h2>
+          </Match>
+          <Match when={true}>
+            <h2 style={{ color: '#333' }}>Please join or create any channel to start</h2>
+          </Match>
+        </Switch>
       </div>
       <div class={styles.App__messages} ref={setContainer}>
         <For each={filteredMessages()}>
@@ -129,17 +136,19 @@ export function Chat() {
           )}
         </For>
       </div>
-      <div class={styles.App__input}>
-        <textarea
-          name="message"
-          placeholder={`Message the ${currentChannel()} channel`}
-          onChange={(event) => setMessageTerm(event.target.value)}
-          value={messageTerm()}
-        />
-        <button class={styles.App__button} onClick={handleSubmit}>
-          Send
-        </button>
-      </div>
+      <Show when={currentChannel() !== ''}>
+        <div class={styles.App__input}>
+          <textarea
+            name="message"
+            placeholder={`Message the ${currentChannel()} channel`}
+            onChange={(event) => setMessageTerm(event.target.value)}
+            value={messageTerm()}
+          />
+          <button class={styles.App__button} onClick={handleSubmit}>
+            Send
+          </button>
+        </div>
+      </Show>
     </div>
   )
 }
