@@ -5,12 +5,10 @@ import { chats } from '../../backend/models'
 import { createSyncedStoreSig } from '../../adaptors/solid-synced-store'
 import styles from './styles.module.scss'
 import { useNavigate } from '@solidjs/router'
-import { Chip, IconButton } from '@suid/material'
-import { Add as AddIcon, Tab } from '@suid/icons-material'
-
+import { Chip, IconButton, Input } from '@suid/material'
+import { Add as AddIcon, Remove as RemoveIcon } from '@suid/icons-material'
 // TODO: Do not load all messages at once
 // TODO: Support Markdown
-// TODO: Users should be able to add their own channels (currently hard-coded)
 
 export function Chat() {
   const { rootDoc, syncAgent, booted } = useNdnWorkspace()!
@@ -21,7 +19,10 @@ export function Chat() {
 
   const [messageTerm, setMessageTerm] = createSignal('')
   const [container, setContainer] = createSignal<HTMLDivElement>()
+
   const [currentChannel, setCurrentChannel] = createSignal('') // starts on no channel
+  const [isEditingChannel, setEdittingChannel] = createSignal(false) // starts on not editting anything
+  const [channelName, setChannelName] = createSignal('') // starts on empty
 
   // const channels = ['general', 'paper_writing', 'code_discussion', 'help'] // Define your channels here
   const channelsSync = createSyncedStoreSig(() => rootDoc()?.chats_channels)
@@ -44,23 +45,27 @@ export function Chat() {
   }
 
   /* Create new channels */
-  const generateChannelName = () => {
-    let name = 'new_channel'
-    if (channels() === undefined) return name
-    else {
-      let idx = 1
-      while (channels()?.includes(name)) {
-        idx++
-        name = 'new_channel'.concat('_', idx.toString())
-      }
-      return name
+  const addChannel = (name: string) => {
+    if (!channels()?.includes(name)) {
+      channels()?.push(name)
+    }
+    setCurrentChannel(name)
+  }
+
+  const handleAddChannel = () => {
+    setEdittingChannel(!isEditingChannel())
+
+    if (isEditingChannel()) {
+      document.getElementById('channel_input')?.focus() // Focus on the input
     }
   }
 
-  const addChannel = () => {
-    const name = generateChannelName()
-    channels()?.push(name)
-    setCurrentChannel(name)
+  const handleSubmitChannel = (e: KeyboardEvent, name: string) => {
+    if (e.key === 'Enter') {
+      addChannel(name)
+      setEdittingChannel(false)
+      setChannelName('')
+    }
   }
 
   const removeChannel = (channel: string) => {
@@ -95,12 +100,29 @@ export function Chat() {
                 onDelete={() => removeChannel(channel)}
                 clickable={true}
                 onClick={() => setCurrentChannel(channel)}
-              ></Chip>
+              />
             )}
           </For>
-          <IconButton onClick={addChannel}>
-            <AddIcon />
+          <IconButton onClick={handleAddChannel}>
+            <Switch>
+              <Match when={!isEditingChannel()}>
+                <AddIcon />
+              </Match>
+              <Match when={true}>
+                <RemoveIcon />
+              </Match>
+            </Switch>
           </IconButton>
+          <Show when={isEditingChannel()}>
+            <Input
+              id="channel_input"
+              value={channelName()}
+              autoComplete="true"
+              disabled={!isEditingChannel()}
+              onChange={(event) => setChannelName(event.target.value)}
+              onKeyDown={(event) => handleSubmitChannel(event, channelName())}
+            ></Input>
+          </Show>
         </div>
         <Switch>
           <Match when={currentChannel() !== ''}>
